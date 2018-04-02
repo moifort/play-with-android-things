@@ -13,8 +13,13 @@ import com.google.android.things.contrib.driver.rainbowhat.RainbowHat
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.GpioCallback
 import com.google.android.things.pio.PeripheralManager
+import com.google.android.things.update.UpdateManager
+import com.google.android.things.update.UpdateManagerStatus
+import com.google.android.things.update.UpdateManagerStatus.*
+import com.google.android.things.update.UpdatePolicy
 import com.google.firebase.database.FirebaseDatabase
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : Activity(), SensorEventListener, GpioCallback {
@@ -32,7 +37,7 @@ class MainActivity : Activity(), SensorEventListener, GpioCallback {
 
         val mDisplay = RainbowHat.openDisplay()
         mDisplay.setEnabled(true)
-        mDisplay.display("TIBO")
+        mDisplay.display("BOOB")
 
         val mLedstrip = RainbowHat.openLedStrip()
         mLedstrip.brightness = 0
@@ -66,6 +71,32 @@ class MainActivity : Activity(), SensorEventListener, GpioCallback {
         buttonC.setEdgeTriggerType(Gpio.EDGE_BOTH)
         buttonC.setActiveType(Gpio.ACTIVE_LOW)
         buttonC.registerGpioCallback(this)
+
+        val updateManager = UpdateManager.getInstance()
+        val policy = UpdatePolicy.Builder()
+                .setPolicy(UpdateManager.POLICY_APPLY_AND_REBOOT)
+                .setApplyDeadline(30, TimeUnit.SECONDS)
+                .build()
+
+        updateManager.setPolicy(policy)
+        updateManager.channel = "dev-channel"
+        updateManager.addStatusListener { updateStatus(it) }
+        updateStatus(updateManager.status)
+        updateManager.performUpdateNow(UpdateManager.POLICY_APPLY_AND_REBOOT)
+    }
+
+    private fun updateStatus(updateStatus: UpdateManagerStatus) {
+        val status = when (updateStatus.currentState) {
+            STATE_IDLE -> "IDLE"
+            STATE_CHECKING_FOR_UPDATES -> "CHECKING_FOR_UPDATES"
+            STATE_DOWNLOADING_UPDATE -> "DOWNLOADING_UPDATE_${(updateStatus.pendingUpdateInfo.downloadProgress * 100).toInt()}"
+            STATE_FINALIZING_UPDATE -> "FINALIZING_UPDATE"
+            STATE_REPORTING_ERROR -> "REPORTING_ERROR"
+            STATE_UPDATED_NEEDS_REBOOT -> "UPDATED_NEEDS_REBOOT"
+            STATE_UPDATE_AVAILABLE -> "UPDATE_AVAILABLE"
+            else -> "NOT_DEFINED"
+        }
+        database.reference.child("update").setValue(UpdateStatus(status, BuildConfig.VERSION_NAME, updateStatus.currentVersionInfo.oemVersion, System.currentTimeMillis()))
     }
 
     override fun onStart() {
@@ -119,4 +150,5 @@ class MainActivity : Activity(), SensorEventListener, GpioCallback {
 }
 
 data class Temperature(val value: Double, val timestamp: Long)
+data class UpdateStatus(val status: String, val applicationVersion: String, val oemVersion: String, val timestamp: Long)
 data class Button(val state: Boolean)
