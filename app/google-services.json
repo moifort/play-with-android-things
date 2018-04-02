@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "494798376123",
+    "firebase_url": "https://things-fae70.firebaseio.com",
+    "project_id": "things-fae70",
+    "storage_bucket": "things-fae70.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:494798376123:android:9d6a7eb8654c5733",
+        "android_client_info": {
+          "package_name": "me.mottet.things"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "494798376123-d54qvrd3v9b32f6subpmapcl0qkk0pms.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH1oJre6liAqamYbg_bbSCUzL69fFiHuQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
